@@ -22,12 +22,15 @@ def make_bsObject(url):
         return None
     try:
         bsObj = bs(html.read())
-        crawl_website(bsObj)
+        lck_year = re.search(r'\d{4}', url)
+        lck_season = re.search(r'\/(\w+)_Season\/(\w+)_Season\/', url)
+        crawl_website_url1(bsObj, lck_year.group(), lck_season.group(2))
+        crawl_website_url2(bsObj, lck_year.group(), lck_season.group(2))
     except AttributeError as e:
         print('AttributeError', e)
         return None
     
-def crawl_website(bsObj):
+def crawl_website_url1(bsObj, lck_year, lck_season):
     # length = 171
     csv_data = []
     
@@ -55,12 +58,12 @@ def crawl_website(bsObj):
         item = re.sub(r'^/wiki/', '', i['href'])
         if item in team:
             match_team_list.append(item)
-    
-    
-    match_team_list = match_team_list[12:]
+    match_team_list = match_team_list[8:]
     team1_list = match_team_list[0::3]
     team2_list = match_team_list[1::3]
     team_winlist = match_team_list[2::3]
+    team1_winlist = [True if team1_list[i] == team_winlist[i] else False for i in range(len(team_winlist))]
+    # team1_winlist -> team1_list와 같으면 True 아니면 False
     
     _picklist = bsObj.find_all('span', {'class':'sprite champion-sprite'})
     temp_picklist = []
@@ -103,9 +106,8 @@ def crawl_website(bsObj):
     team2_support_playerlist = playerlist[9::10]
     
     
-    
     # make init csv data
-    csv_data = list(zip(datelist, patch_versionlist, team1_list, team2_list, team_winlist,
+    csv_data = list(zip(datelist, patch_versionlist, team1_list, team2_list, team1_winlist,
                         team1_top_champlist, team1_jungle_champlist, team1_mid_champlist,
                         team1_adc_champlist, team1_support_champlist, team2_top_champlist,
                         team2_jungle_champlist, team2_mid_champlist, team2_adc_champlist, team2_support_champlist,
@@ -115,8 +117,10 @@ def crawl_website(bsObj):
                         ))
     
     # make new csv
-    a = Data('lck_data.csv', csv_data)
-    a.init_insert()
+    lck_csv = Data('lck{}_{}_data.csv'.format(lck_year, lck_season), csv_data)
+    lck_csv.init_insert()
     
     
     return None
+
+    

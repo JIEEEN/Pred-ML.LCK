@@ -1,18 +1,24 @@
 import requests
 import re
 import os
-from crawler.url import url
+from crawler.url import ret_init_url
 from urllib.error import HTTPError
 from urllib.request import urlopen
 from bs4 import BeautifulSoup as bs
 from crawler.database import Data
 
-team = ['Nongshim_RedForce', 'OKSavingsBank_BRION', 'Hanwha_Life_Esports',
-        'T1', 'DRX', 'Kwangdong_Freecs', 'KT_Rolster', 'Liiv_SANDBOX',
-        'Gen.G', 'Dplus_KIA']
+team = ['Team_Dynamics', 'Nongshim_RedForce', 'SeolHaeOne_Prince', 'OKSavingsBank_BRION', 'Fredit_BRION', 'BRION' , 'Hanwha_Life_Esports',
+        'T1', 'DRX', 'DragonX', 'Kwangdong_Freecs', 'Afreeca_Freecs', 'KT_Rolster', 'Liiv_SANDBOX', 'SANDBOX_Gaming',
+        'Gen.G', 'DWG_KIA', 'Dplus_KIA', 'DAMWON_Gaming', 'APK_Prince', 'Griffin_(Korean_Team)', 'Griffin__28-Korean_Team_29-', 'Gen_2e-G']
 
 def init_crawl():
-    make_bsObject(url[0])
+    year = ['2020', '2021', '2022', '2023']
+    season = ['Spring', 'Summer']
+    
+    for i in year:
+        for j in season:
+            url = ret_init_url(i, j)
+            make_bsObject(url)
 
 def make_bsObject(url):
     try:
@@ -25,7 +31,7 @@ def make_bsObject(url):
         lck_year = re.search(r'\d{4}', url)
         lck_season = re.search(r'\/(\w+)_Season\/(\w+)_Season\/', url)
         crawl_website_url1(bsObj, lck_year.group(), lck_season.group(2))
-        crawl_website_url2(bsObj, lck_year.group(), lck_season.group(2))
+        # crawl_website_url2(bsObj, lck_year.group(), lck_season.group(2))
     except AttributeError as e:
         print('AttributeError', e)
         return None
@@ -51,14 +57,18 @@ def crawl_website_url1(bsObj, lck_year, lck_season):
             patch_version = item.get_text()
             patch_versionlist.append(patch_version)
             
-            
-    temp = bsObj.find_all('a', {'class':'to_hasTooltip', 'data-to-flags': 'fiem'}, href=True)
+    temp = bsObj.find_all('a', {'class':'to_hasTooltip', 'data-to-flags': 'fiem'}, href=re.compile(r'/wiki/'))
     match_team_list = []
     for i in temp:
         item = re.sub(r'^/wiki/', '', i['href'])
+        # item = i['data-to-id']
         if item in team:
+            print(item)
             match_team_list.append(item)
-    match_team_list = match_team_list[8:]
+    if lck_season == 'Summer' and not lck_year == '2020' and not lck_year == '2023':
+        match_team_list = match_team_list[10:]
+    else:
+        match_team_list = match_team_list[8:]
     team1_list = match_team_list[0::3]
     team2_list = match_team_list[1::3]
     team_winlist = match_team_list[2::3]
@@ -123,4 +133,5 @@ def crawl_website_url1(bsObj, lck_year, lck_season):
     
     return None
 
-    
+# def crawl_website_url2(bsObj, lck_year, lck_season):
+    #

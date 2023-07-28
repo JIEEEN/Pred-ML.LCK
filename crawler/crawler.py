@@ -14,6 +14,8 @@ team = ['Team_Dynamics', 'Nongshim_RedForce', 'SeolHaeOne_Prince', 'OKSavingsBan
 def init_crawl():
     year = ['2020', '2021', '2022', '2023']
     season = ['Spring', 'Summer']
+    # year=['2021']
+    # season=['Summer']
     
     for i in year:
         for j in season:
@@ -63,7 +65,6 @@ def crawl_website_url1(bsObj, lck_year, lck_season):
         item = re.sub(r'^/wiki/', '', i['href'])
         # item = i['data-to-id']
         if item in team:
-            print(item)
             match_team_list.append(item)
     if lck_season == 'Summer' and not lck_year == '2020' and not lck_year == '2023':
         match_team_list = match_team_list[10:]
@@ -98,11 +99,14 @@ def crawl_website_url1(bsObj, lck_year, lck_season):
     team2_support_champlist = picklist[9::10]
     
     
-    _playerlist = bsObj.find_all('a', {'class':'catlink-players pWAG pWAN to_hasTooltip'},href=True)
+    
+    _playerlist = bsObj.find_all('a', {'class':['catlink-players pWAG pWAN to_hasTooltip', 'mw-redirect to_hasTooltip']},href=True)
     playerlist = []
     for player in _playerlist:
-        playerlist.append(player.get_text())
-        
+        matched = re.search(r'>(.*?)</a>', str(player))
+        playerlist.append(matched.group(1))
+    playerlist = playerlist[9:]
+    
     team1_top_playerlist = playerlist[0::10]
     team1_jungle_playerlist = playerlist[1::10]
     team1_mid_playerlist = playerlist[2::10]
@@ -114,7 +118,6 @@ def crawl_website_url1(bsObj, lck_year, lck_season):
     team2_mid_playerlist = playerlist[7::10]
     team2_adc_playerlist = playerlist[8::10]
     team2_support_playerlist = playerlist[9::10]
-    
     
     # make init csv data
     csv_data = list(zip(datelist, patch_versionlist, team1_list, team2_list, team1_winlist,

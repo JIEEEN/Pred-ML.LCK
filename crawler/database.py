@@ -21,3 +21,19 @@ class Data:
         # To Be Implemented
         return None
     
+    def integrate(self):
+        year = ['2020', '2021', '2022', '2023']
+        season = ['Spring', 'Summer']
+        csvfiles = []
+        for i in year:
+            for j in season:
+                filename = 'lck' + i + '_' + j + '_data.csv'
+                csvfiles.append(pd.read_csv(os.getcwd() + '/csv/' + filename))
+        
+        res = pd.concat(csvfiles)
+        res.sort_values(by=['date'], axis=0, ascending=True, inplace=True, ignore_index=True)
+        res.drop(['Unnamed: 0'], axis=1, inplace=True)
+        res = res.reset_index(drop=True)
+        
+        res.to_csv(os.getcwd() + '/csv/lck_data.csv')
+    

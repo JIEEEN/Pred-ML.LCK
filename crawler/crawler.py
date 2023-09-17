@@ -18,17 +18,17 @@ def ret_init_url(lck_year, lck_season, category):
 
 # initialize database
 def init_crawl():
-    year = ['2020', '2021', '2022', '2023']
-    season = ['Spring', 'Summer']
-    # year = ['2023']
-    # season = ['Summer']
+    # year = ['2020', '2021', '2022', '2023']
+    # season = ['Spring', 'Summer']
+    year = ['2020']
+    season = ['Summer']
 
     for i in year:
         for j in season:
             category = 'Match_History'
             url = ret_init_url(i, j, category)
             make_bsObject(url, category)
-            
+
     for i in year:
         for j in season:
             category = 'Champion_Statistics'
@@ -60,7 +60,7 @@ def make_bsObject(url, category):
 def crawl_match_history(bsObj, lck_year, lck_season):
     # length = 171
     global csv_data
-    
+
     # record date
     _datelist = bsObj.find_all('td', {'class': 'mhgame-result'})
     datelist = []
@@ -86,10 +86,13 @@ def crawl_match_history(bsObj, lck_year, lck_season):
         item = re.sub(r'^/wiki/', '', i['href'])
         if item in team:
             match_team_list.append(item)
-    if lck_season == 'Summer' and not lck_year == '2020' and not lck_year == '2023':
-        match_team_list = match_team_list[10:]
+
+    # print(match_team_list)
+    if lck_season == 'Summer' and lck_year == '2023':
+        match_team_list = match_team_list
     else:
-        match_team_list = match_team_list[8:]
+        match_team_list = match_team_list[4:]
+        
     team1_list = match_team_list[0::3]
     team2_list = match_team_list[1::3]
     team_winlist = match_team_list[2::3]
@@ -139,8 +142,6 @@ def crawl_match_history(bsObj, lck_year, lck_season):
     team2_mid_playerlist = playerlist[7::10]
     team2_adc_playerlist = playerlist[8::10]
     team2_support_playerlist = playerlist[9::10]
-    
-    
 
     # make init csv data
     csv_data = list(zip(datelist, patch_versionlist, team1_list, team2_list, team1_winlist,
@@ -155,10 +156,9 @@ def crawl_match_history(bsObj, lck_year, lck_season):
     # make new csv
     lck_csv = Data('lck{}_{}_data.csv'.format(lck_year, lck_season), csv_data)
     lck_csv.init_insert()
-    
+
     lck_csv.integrate()
 
     return None
 
 # def crawl_champion_statistics(bsObj, lck_year, lck_season):
-    
